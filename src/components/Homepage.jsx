@@ -10,23 +10,46 @@ const Homepage = () => {
   const [playCourse, setPlayCourse] = useState(false);
   const [resourceData, setResourceData] = useState([]);
   const [courseDetails, setCourseDetails] = useState();
+  const [programDetailObject, setProgramDetailObject] = useState({});
+  const [jobAids, setJobAids] = useState();
+  const [courseId, setCourseId] = useState();
+  const [badgeId, setBadgeId] = useState();
+  const [badgeResponse, setBadgeResponse] = useState();
+  
+
   let location = useLocation();
-  const token = "cccf80201d23556175a9b66ad31e8738";
-  const cid = "learningProgram:59671";
-  // const cid = "learningProgram:59654";
-  // const cid = "course:2153078";
+  const token = "29fcc2284e20a980a52e660051587b6b";
+  const cid = "learningProgram:60466";
+
   useEffect(() => {
     const fetchData = async () => {
-      const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects/${cid}?include=enrollment.loResourceGrades%2CsubLOs.enrollment.loResourceGrades%2Cenrollment.loInstance.loResources.resources%2Cinstances.loResources.resources%2Cskills.skillLevel.skill%2CsubLOs.instances.subLoInstances%2CsubLOs.instances.loResources.resources%2CsubLOs.supplementaryResources%2CsupplementaryResources`;
+      const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects/${cid}?include=enrollment.loResourceGrades%2CsubLOs.enrollment.loResourceGrades%2Cenrollment.loInstance.loResources.resources%2Cinstances.loResources.resources%2Cskills.skillLevel.skill%2CsubLOs.instances.subLoInstances%2CsubLOs.instances.loResources.resources%2CsubLOs.subLOs%2csupplementaryResources%2CsupplementaryLOs`;
       try {
-        const response = await axios.get(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axios.get(apiUrl);
         setResponse(response?.data);
         console.log("response?.data", response?.data);
+        const program = response?.data?.data?.relationships?.instances?.data;
+        const programDetails = {};
+        if (program) {
+          for (let i = 0; i < program.length; i++) {
+            const programList = response?.data?.included?.find(
+              (ele) => ele.id == program[i].id
+            );
+            programDetails.name =
+              response?.data?.data?.attributes?.localizedMetadata[0]?.name;
+            programDetails.overview =
+              response?.data?.data?.attributes?.localizedMetadata[0]?.overview;
+            programDetails.bannerImage =
+              response?.data?.data?.attributes?.bannerUrl;
+            programDetails.completionDeadline =
+              programList?.attributes.completionDeadline;
+            programDetails.enrollmentDeadline =
+              programList?.attributes.enrollmentDeadline;
+          }
+          setProgramDetailObject(programDetails);
+        }
+        console.log("programDetails", programDetails);
+        // get the resources details
         const responseData =
           response?.data?.data?.relationships?.hasOwnProperty(
             "supplementaryResources"
@@ -45,61 +68,240 @@ const Homepage = () => {
         });
         setResourceData(documentArray);
 
+        // get the week details and course under it
         const res = response?.data?.data?.relationships?.subLOs?.data;
         const courseList = [];
         for (let i = 0; i < res.length; i++) {
           const temp = {};
-          const courseDetails = response?.data?.included?.find(
+          const LPDetails = response?.data?.included?.find(
             (ele) => ele.id == res[i].id
           );
-          console.log("courseDetails", courseDetails);
-          temp.name = courseDetails?.attributes?.localizedMetadata[0]?.name;
-          temp.overview =
-            courseDetails?.attributes?.localizedMetadata[0]?.overview;
-          temp.id = courseDetails?.id;
-          // temp.image = courseDetails?.attributes?.imageUrl;
-          // temp.supplementaryResources =
-          //   courseDetails?.relationships?.supplementaryResources ?? null;
-          const spData =
-            courseDetails?.relationships?.supplementaryResources?.data;
 
-          // console.log("Testing",spData)
+          temp.name = LPDetails?.attributes?.localizedMetadata[0]?.name;
+          temp.overview = LPDetails?.attributes?.localizedMetadata[0]?.overview;
+          temp.id = LPDetails?.id;
+          // temp.tag = LPDetails?.attributes?.tags[0];
+          temp.supplementaryResources =
+            LPDetails?.relationships?.supplementaryResources ?? null;
+          console.log("Temp0", temp);
+          let courseArray = [];
+          const learningPathCourseDetails = response?.data?.included?.find(
+            (ele) => ele?.id === temp?.id
+          );
+          if (learningPathCourseDetails) {
+            const subLos =
+              learningPathCourseDetails?.relationships?.subLOs?.data;
+            if (subLos) {
+              for (let i = 0; i < subLos.length; i++) {
+                const courseAttributes = {};
+                const course = response?.data?.included?.find(
+                  (ele) => ele.id === subLos[i]?.id
+                );
+                courseAttributes.name =
+                  course?.attributes?.localizedMetadata[0].name;
+                courseAttributes.id = course?.id;
+                courseAttributes.description =
+                  course?.attributes?.localizedMetadata[0]?.description;
+                courseArray.push(courseAttributes);
+              }
+            }
+          }
+          temp.courseArray = courseArray;
+
+          // get the instance details
+          const LPInstanceDetails = response?.data?.included?.find(
+            (ele) => ele?.id === temp?.id
+          );
+          const instanceObject = {};
+          if (LPInstanceDetails) {
+            const instances = LPInstanceDetails?.relationships?.instances?.data;
+            if (instances) {
+              for (let i = 0; i < instances.length; i++) {
+                const instanceDetails = response?.data?.included?.find(
+                  (ele) => ele.id === instances[i]?.id
+                );
+                instanceObject.enrollmentDeadline =
+                  instanceDetails?.attributes?.enrollmentDeadline;
+              }
+            }
+          }
+
+          //  get badge details
+          const badge = response?.data?.included;
+          badge.map((badgeItem) => {
+            // console.log("badgeItem", index ,badgeItem);
+            if (badgeItem?.relationships?.badge) {
+              console.log(
+                "badge ID",
+                badgeItem?.relationships?.badge?.data?.id
+              );
+              setBadgeId(badgeItem?.relationships?.badge?.data?.id);
+            }
+          });
+          const spData =
+            courseArray?.relationships?.supplementaryResources?.data;
           const spList = [];
           if (spData?.length > 0) {
             const sp = {};
             for (let j = 0; j < spData?.length; j++) {
-              console.log("res", response?.data?.included);
               const res = response?.data?.included?.find(
                 (ele) => ele?.id == spData[j]?.id
               );
-              console.log("testing..", res);
               sp.name = res?.attributes?.name;
               sp.location = res?.attributes?.location;
               spList.push(sp);
             }
           }
           temp.supplementaryResources = spList;
-
+          temp.enrollmentDeadline = instanceObject?.enrollmentDeadline;
           courseList.push(temp);
-          console.log("listing", courseList);
           setCourseDetails(courseList);
         }
+
+        const jobAidsID =
+          response?.data?.data?.relationships?.supplementaryLOs?.data[0].id;
+        setJobAids(jobAidsID);
       } catch (error) {
         console.error("Error:", error);
       }
     };
     fetchData();
   }, []);
-  console.log("course", courseDetails);
+
+  // useEffect for badge API call
+
+  useEffect(() => {
+    const badgeData = async () => {
+      if (badgeId) {
+        const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/badges/${badgeId}`;
+        try {
+          const response = await axios.get(apiUrl);
+          setBadgeResponse(response?.data);
+          console.log("Badge Data", response?.data);
+        } catch (error) {
+          console.log("error", error);
+        }
+      }
+    };
+
+    badgeData();
+  }, [badgeId]);
+
+  function formatEnrollmentDeadlineForProgram(enrollmentDeadline) {
+    const sevenDaysBefore = new Date(enrollmentDeadline);
+    sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 21); // Subtract 21 days
+    const options = {
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    };
+    return sevenDaysBefore.toLocaleString("en-US", options);
+  }
+
+  function formatCompletionDeadlineForProgram(enrollmentDeadline) {
+    const sevenDaysBefore = new Date(enrollmentDeadline);
+    sevenDaysBefore.setDate(sevenDaysBefore.getDate());
+    const options = {
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    };
+    return sevenDaysBefore.toLocaleString("en-US", options);
+  }
+
+  function formatEnrollmentDeadline(enrollmentDeadline) {
+    const sevenDaysBefore = new Date(enrollmentDeadline);
+    sevenDaysBefore.setDate(sevenDaysBefore.getDate() - 7); // Subtract 7 days
+    const options = {
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    };
+    return sevenDaysBefore.toLocaleString("en-US", options);
+  }
+
+  const hasWeekStart = (enrollmentDeadline) => {
+    if (enrollmentDeadline) {
+      const startDate = new Date(enrollmentDeadline);
+      startDate.setDate(startDate.getDate() - 7);
+      console.log("StartDate", startDate);
+      const currentDate = new Date();
+      console.log("current Date", currentDate);
+
+      return startDate <= currentDate;
+    }
+    return false;
+  };
+
+
+  // function to play course/content passing ID in fluidic player
+  const playVideo = (id) => {
+    setPlayCourse(true);
+    if (id) {
+      setCourseId(id);
+    } else {
+      alert("Error while playing video");
+    }
+  };
+
+  // function for bookmarkContent
+  const bookmarkContent = async (courseID) => {
+    const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects/${courseID}/bookmark`;
+    try {
+      const response = await axios.post(apiUrl);
+      console.log("response-book", response);
+      if (response?.status == 201) {
+        console.log("test-bookmark");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //handle enrollment
+  // const handleEnrollment = async (loId, instanceId) => {
+  //   console.log("loid", loId, instanceId);
+  //   console.log("response?.data?.attributes?.id", response?.data?.id);
+  //   const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/enrollments?loId=${loId}&loInstanceId=${instanceId}`;
+  //   try {
+  //     const response = await axios.get(apiUrl);
+  //     console.log("response?.data-book", response?.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   // setResponse(response?.data);
+  // };
+
+  const handleUnenrollment = async (enrollmentId) => {
+    console.log("unenrollment", enrollmentId);
+    const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/enrollments/${enrollmentId}`;
+    try {
+      const response = await axios.delete(apiUrl);
+      console.log("response?.data-book", response?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="container">
       {playCourse ? (
-        <CoursePlayer cid={cid} goBackUrl={location.pathname} token={token} />
+        <CoursePlayer
+          cid={courseId}
+          goBackUrl={location.pathname}
+          token={token}
+        />
       ) : null}
       <div className="title-container">
         <h3>Programs</h3>
         <img
-          src={response?.data?.attributes?.bannerUrl}
+          src={programDetailObject.bannerImage}
           alt=""
           style={{ height: "100px", width: "100px" }}
         />
@@ -111,26 +313,70 @@ const Homepage = () => {
           style={{ height: "100px", width: "100px" }}
         />
         <p>cover Image</p>
-        <h2>
-          Program Name: {response?.data?.attributes?.localizedMetadata[0].name}
-        </h2>
+        <h2>Program Name: {programDetailObject?.name}</h2>
 
         <div className="description">
+          <p>Description: {programDetailObject?.overview}</p>
+        </div>
+        <div className="dateDetails">
           <p>
-            Description:{" "}
-            {response?.data?.attributes?.localizedMetadata[0].overview}
+            Enrollment start from:{" "}
+            {formatEnrollmentDeadlineForProgram(
+              programDetailObject?.enrollmentDeadline
+            )}
+          </p>
+          <p>
+            Completion Deadline:
+            {formatCompletionDeadlineForProgram(
+              programDetailObject?.completionDeadline
+            )}
           </p>
         </div>
         <div className="btn-container">
-          <button
-            onClick={() => {
-              setPlayCourse((prev) => !prev);
-            }}
-          >
-            Play Course
-          </button>
+          <button onClick={() => playVideo(jobAids)}>Play Trailer Video</button>
         </div>
         <div>
+          <div className="badge">
+            {badgeResponse ? (
+              <div>
+                <p style={{ color: "black" }}>
+                  {badgeResponse?.data?.attributes?.name}
+                </p>
+                <img
+                  src={badgeResponse?.data?.attributes?.imageUrl}
+                  alt=""
+                  height={200}
+                  width={200}
+                />
+              </div>
+            ) : null}
+
+            <div className="enrollment">
+              {/* <button
+                onClick={() =>
+                  handleEnrollment(
+                    response?.data?.id,
+                    response?.data?.relationships?.instances?.data[0]?.id
+                  )
+                }
+              >
+                Enroll Now
+              </button> */}
+              {true && (
+                <button
+                  onClick={() =>
+                    handleUnenrollment(
+                      response?.data?.relationships?.enrollment?.data?.id
+                    )
+                  }
+                >
+                  Unenroll from this program
+                </button>
+              )}
+            </div>
+
+            <div className="unenrollment"></div>
+          </div>
           <p>Class Resources</p>
           {resourceData &&
             resourceData?.map((ele) => {
@@ -147,36 +393,49 @@ const Homepage = () => {
         </div>
       </div>
       <div className="list-container">
-        {response?.data?.attributes?.sections.map((section) => (
-          <div key={section.sectionId} className="section">
-            <Accordion>
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>
-                  <h3>{section.localizedMetadata[0].name}</h3>
-                </Accordion.Header>
-                <Accordion.Body>
-                  {courseDetails
-                    .filter((course) => section.loIds.includes(course.id))
-                    .map((course) => (
-                      <div key={course.id} className="course-details">
-                        <h2>{course.name}</h2>
-                        <div className="description">
-                          <p>{course.overview}</p>
-                        </div>
-                        <div>
-                          <p>Course Attachment</p>
-                          <a href={course.supplementaryResources[0]?.location} target="_blank">
-                            {course.supplementaryResources[0]?.name}  
-                          </a>
-                        </div>
-                        <hr />
-                      </div>
-                    ))}
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </div>
-        ))}
+        <div className="section">
+          {courseDetails &&
+            courseDetails.map((week) => {
+              return (
+                <>
+                  <Accordion>
+                    <Accordion.Item eventKey="1">
+                      <Accordion.Header>
+                        <h2>{week?.name}</h2>
+                        <p>
+                          {formatEnrollmentDeadline(week?.enrollmentDeadline)}
+                        </p>
+                        <p>
+                          {hasWeekStart(week.enrollmentDeadline)
+                            ? "enabled"
+                            : "disabled"}
+                        </p>
+                      </Accordion.Header>
+                      {week?.courseArray?.map((course) => {
+                        return (
+                          <>
+                            <Accordion.Body style={{ color: "red" }}>
+                              <h4 onClick={() => playVideo(course?.id)}>
+                                {course?.name}
+                              </h4>
+                              <p>{course?.description}</p>
+                              <button
+                                onClick={() => bookmarkContent(course?.id)}
+                              >
+                                Bookmark
+                              </button>
+                              <hr />
+                            </Accordion.Body>
+                          </>
+                        );
+                      })}
+                    </Accordion.Item>
+                  </Accordion>
+                </>
+              );
+            })}
+          
+        </div>
       </div>
     </div>
   );

@@ -4,59 +4,80 @@
   box-sizing: border-box;
 }
 
-.title-container{
-    border: 2px solid black;
-    margin: 10px;
+.title-container {
+  border: 2px solid black;
+  margin: 10px;
 }
 
-.title-container h3,h2, p{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px;
+.title-container h3,
+h2,
+p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
 }
 
-.metadata{
-    display: flex;
-    flex-direction: row;
+.metadata {
+  display: flex;
+  flex-direction: row;
 }
 
 .metadata li {
-    margin: 10px;
-    padding: 10px;
+  margin: 10px;
+  padding: 10px;
 }
 
-.module-count{
-    margin-left: 80%;
+.module-count {
+  margin-left: 80%;
 }
 
-.course-title{
-    display: flex;
-    
+.course-title {
+  display: flex;
 }
-.btn-container{
-    display: flex;
-    align-items: center;
-    justify-self: center;
-    margin: 10px;
+.btn-container {
+  display: flex;
+  align-items: center;
+  justify-self: center;
+  margin: 10px;
 }
 
-.btn-container button{
-    border: none;
-    outline: none;
-    padding: 8px;
-    background-color: black;
-    color:#fff;
-    margin-left: 50%;
+.btn-container button {
+  border: none;
+  outline: none;
+  padding: 8px;
+  background-color: black;
+  color: #fff;
+  margin-left: 50%;
 }
 
 .resources {
-    display: flex;
-    align-items: center;
-    justify-content: start;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.disabled {
+  color: black;
+}
+
+.btn-finish{
+  border: none;
+  outline: none;
+  padding: 6px;
+  background-color: orange;
+  color: #fff;
 }
 
 
+
+.enrollment button{
+  border: 1px solid black;
+  outline: none;
+  background-color: orange;
+  padding: 7px;
+  margin: 10px;
+}
 
 
 
