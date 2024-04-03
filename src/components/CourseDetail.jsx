@@ -1,14 +1,17 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CoursePlayer from "./CoursePlayer";
+import Card from "react-bootstrap/Card";
+import "./coursedetails.css";
 const CourseDetail = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [coursePlayerId, setcoursePlayerId] = useState();
   const [playCourse, setPlayCourse] = useState(false);
+  const [relatedContent, setRelatedContent] = useState([]);
 
-  const token = "8e0cea38d5de4113e0567e1f6a0ad487";
+  const token = "3259c549e7f5663f6240bfa6be44ecef";
 
   useEffect(() => {
     // Fetch course details based on courseId
@@ -22,6 +25,15 @@ const CourseDetail = () => {
       }
     };
     fetchData();
+
+    const fetchRelatedContent = async () => {
+      const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects?page[limit]=10&filter.loTypes=course&sort=name&filter.tagName=related-content&filter.ignoreEnhancedLP=false`;
+
+      const response = await axios.get(apiUrl);
+
+      setRelatedContent(response?.data);
+    };
+    fetchRelatedContent();
   }, [courseId]);
 
   // function to play course/content passing ID in fluidic player
@@ -34,7 +46,7 @@ const CourseDetail = () => {
     }
   };
 
-  console.log("xourse", course);
+  console.log("relatedcontent", relatedContent?.data);
 
   return (
     <>
@@ -64,13 +76,34 @@ const CourseDetail = () => {
               <p>
                 Overview: {course.data.attributes.localizedMetadata[0].overview}{" "}
               </p>
-              <button onClick={() => playVideo(course?.data?.id)}>Play Course</button>
+              <button onClick={() => playVideo(course?.data?.id)}>
+                Play Course
+              </button>
             </>
           ) : (
             <p>Loading...</p>
           )}
         </div>
       </div>
+      {relatedContent &&
+        relatedContent?.data?.map((course) => {
+          console.log("course", course);
+          return (
+            <div className="content-container" key={course?.id}>
+              <Card style={{ width: "18rem" }}>
+                <Card.Img variant="top" src={course?.attributes?.bannerUrl} />
+                <Card.Body>
+                  <Card.Title>
+                    {course?.attributes?.localizedMetadata[0]?.name}
+                  </Card.Title>
+                  <Card.Text>
+                    {course?.attributes?.localizedMetadata[0]?.description}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </div>
+          );
+        })}
     </>
   );
 };
