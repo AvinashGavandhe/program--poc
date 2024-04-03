@@ -3,7 +3,7 @@ import axios from "axios";
 import "./homepage.css";
 import Accordion from "react-bootstrap/Accordion";
 import CoursePlayer from "./CoursePlayer";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 const Homepage = () => {
   const [response, setResponse] = useState();
@@ -15,10 +15,9 @@ const Homepage = () => {
   const [courseId, setCourseId] = useState();
   const [badgeId, setBadgeId] = useState();
   const [badgeResponse, setBadgeResponse] = useState();
-  
 
   let location = useLocation();
-  const token = "29fcc2284e20a980a52e660051587b6b";
+  const token = "8e0cea38d5de4113e0567e1f6a0ad487";
   const cid = "learningProgram:60466";
 
   useEffect(() => {
@@ -169,7 +168,6 @@ const Homepage = () => {
   }, []);
 
   // useEffect for badge API call
-
   useEffect(() => {
     const badgeData = async () => {
       if (badgeId) {
@@ -239,7 +237,6 @@ const Homepage = () => {
     return false;
   };
 
-
   // function to play course/content passing ID in fluidic player
   const playVideo = (id) => {
     setPlayCourse(true);
@@ -250,7 +247,7 @@ const Homepage = () => {
     }
   };
 
-  // function for bookmarkContent
+  // function for bookmarkContent we need to implement in next page
   const bookmarkContent = async (courseID) => {
     const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects/${courseID}/bookmark`;
     try {
@@ -288,7 +285,6 @@ const Homepage = () => {
       console.log(error);
     }
   };
-
   return (
     <div className="container">
       {playCourse ? (
@@ -413,20 +409,22 @@ const Homepage = () => {
                       </Accordion.Header>
                       {week?.courseArray?.map((course) => {
                         return (
-                          <>
-                            <Accordion.Body style={{ color: "red" }}>
-                              <h4 onClick={() => playVideo(course?.id)}>
-                                {course?.name}
-                              </h4>
-                              <p>{course?.description}</p>
-                              <button
-                                onClick={() => bookmarkContent(course?.id)}
-                              >
-                                Bookmark
-                              </button>
-                              <hr />
-                            </Accordion.Body>
-                          </>
+                          <div key={course?.id}>
+                            <Link to={`/course/${course?.id}`}>
+                              <Accordion.Body style={{ color: "red" }}>
+                                <h4 onClick={() => playVideo(course?.id)}>
+                                  {course?.name}
+                                </h4>
+                                <p>{course?.description}</p>
+                                <button
+                                  onClick={() => bookmarkContent(course?.id)}
+                                >
+                                  Bookmark
+                                </button>
+                                <hr />
+                              </Accordion.Body>
+                            </Link>
+                          </div>
                         );
                       })}
                     </Accordion.Item>
@@ -434,7 +432,6 @@ const Homepage = () => {
                 </>
               );
             })}
-          
         </div>
       </div>
     </div>

@@ -23,7 +23,7 @@ function CoursePlayer(props) {
       if (event.data === "status:close") {
         // window.document.body.style.overflowY = "auto";
         window.removeEventListener("message", closePlayer);
-        navigate("/complete")
+        navigate("/exit")
       }
     };
     window.addEventListener("message", closePlayer);

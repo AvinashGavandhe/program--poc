@@ -1,7 +1,9 @@
+import React from 'react'
+
 const ExitPage = () => {
   return (
     <div>
-      <h1>Hello This is exit page</h1>
+      This is exit page 
     </div>
   )
 }

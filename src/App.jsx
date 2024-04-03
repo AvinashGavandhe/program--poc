@@ -1,8 +1,9 @@
 import Homepage from "./components/Homepage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Routes, Route } from "react-router-dom";
-import ExitPage from "./components/ExitPage";
+import CourseDetail from "./components/CourseDetail.jsx";
 import { jwtInterceptor } from "./services/jwtInterceptor.js";
+import ExitPage from "./components/ExitPage.jsx";
 
 jwtInterceptor();
 
@@ -11,7 +12,8 @@ const App = () => {
     <div>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/complete" element={<ExitPage />} />
+        <Route path="/course/:courseId" element={<CourseDetail />} />
+        <Route path="/exit" element={<ExitPage />} />
       </Routes>
     </div>
   );
