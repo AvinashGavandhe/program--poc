@@ -11,7 +11,7 @@ const CourseDetail = () => {
   const [playCourse, setPlayCourse] = useState(false);
   const [relatedContent, setRelatedContent] = useState([]);
 
-  const token = "3259c549e7f5663f6240bfa6be44ecef";
+  const token = "59ec802573a233608370a4cceac4077b";
 
   useEffect(() => {
     // Fetch course details based on courseId
@@ -27,7 +27,7 @@ const CourseDetail = () => {
     fetchData();
 
     const fetchRelatedContent = async () => {
-      const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects?page[limit]=10&filter.loTypes=course&sort=name&filter.tagName=related-content&filter.ignoreEnhancedLP=false`;
+      const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects?page[limit]=10&filter.loTypes=course&sort=name&filter.tagName=${courseId}&filter.ignoreEnhancedLP=false`;
 
       const response = await axios.get(apiUrl);
 
@@ -46,7 +46,7 @@ const CourseDetail = () => {
     }
   };
 
-  console.log("relatedcontent", relatedContent?.data);
+  console.log("Course-test", course);
 
   return (
     <>
@@ -62,8 +62,10 @@ const CourseDetail = () => {
           {course ? (
             <>
               <img
-                src={course?.data?.attributes?.bannerUrl}
+                src={course?.data.attributes.bannerUrl}
                 alt="course image"
+                height={200}
+                width={800}
               />
               <h2>
                 {" "}
@@ -85,11 +87,11 @@ const CourseDetail = () => {
           )}
         </div>
       </div>
+      <h2>Related Content</h2>
       {relatedContent &&
         relatedContent?.data?.map((course) => {
-          console.log("course", course);
           return (
-            <div className="content-container" key={course?.id}>
+            <div className="card-container" key={course?.id}>
               <Card style={{ width: "18rem" }}>
                 <Card.Img variant="top" src={course?.attributes?.bannerUrl} />
                 <Card.Body>
