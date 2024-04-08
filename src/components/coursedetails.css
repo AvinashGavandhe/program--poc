@@ -1,5 +1,42 @@
 .card-container {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-conversation button{
+    outline: none;
+    border: none;
+    background-color: orange;
+    padding: 7px;
+    border-radius: 7px;
+    margin: 10px;
+}
+.input-container{
+    width: 100%;
+}
+.input-container input{
+    width: 50%;
+}
+
+.input-container button{
+    outline: none;
+    border: none;
+    background-color: orange;
+    padding: 2px;
+    border-radius: 7px;
+    width: 7%;
+    margin: 5px;
+   
+}
+
+.btn{
+    margin: 10px;
+    border: none;
+    background: white;
+    color: black;
+}
+
+.comment-input{
+    padding: 7px;
+    width: 50%;
 }

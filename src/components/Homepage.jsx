@@ -17,7 +17,7 @@ const Homepage = () => {
   const [badgeResponse, setBadgeResponse] = useState();
 
   let location = useLocation();
-  const token = "3259c549e7f5663f6240bfa6be44ecef";
+  const token = "0c4d32a7156df6fd940a767b24dbfb76";
   const cid = "learningProgram:60466";
 
   useEffect(() => {
