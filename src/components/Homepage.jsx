@@ -17,7 +17,7 @@ const Homepage = () => {
   const [badgeResponse, setBadgeResponse] = useState();
 
   let location = useLocation();
-  const token = "f5d28545621b41599fea61831d17a0ce";
+  const token = "15971f8775c9c5783b24ae068415c84e";
   const cid = "learningProgram:60466";
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const Homepage = () => {
         });
         setResourceData(documentArray);
 
-        // get the week details and course under it
+        // get the week details and course under it, Week count
         const res = response?.data?.data?.relationships?.subLOs?.data;
         const courseList = [];
         for (let i = 0; i < res.length; i++) {
@@ -83,6 +83,7 @@ const Homepage = () => {
           temp.supplementaryResources =
             LPDetails?.relationships?.supplementaryResources ?? null;
           console.log("Temp0", temp);
+
           let courseArray = [];
           const learningPathCourseDetails = response?.data?.included?.find(
             (ele) => ele?.id === temp?.id
@@ -96,11 +97,14 @@ const Homepage = () => {
                 const course = response?.data?.included?.find(
                   (ele) => ele.id === subLos[i]?.id
                 );
+                console.log("test", course);
                 courseAttributes.name =
                   course?.attributes?.localizedMetadata[0].name;
                 courseAttributes.id = course?.id;
                 courseAttributes.description =
                   course?.attributes?.localizedMetadata[0]?.description;
+                courseAttributes.bannerUrl = course?.attributes?.bannerUrl;
+                console.log("courseAttributes",courseAttributes);
                 courseArray.push(courseAttributes);
               }
             }
@@ -244,20 +248,6 @@ const Homepage = () => {
       setCourseId(id);
     } else {
       alert("Error while playing video");
-    }
-  };
-
-  // function for bookmarkContent we need to implement in next page
-  const bookmarkContent = async (courseID) => {
-    const apiUrl = `https://learningmanagereu.adobe.com/primeapi/v2/learningObjects/${courseID}/bookmark`;
-    try {
-      const response = await axios.post(apiUrl);
-      console.log("response-book", response);
-      if (response?.status == 201) {
-        console.log("test-bookmark");
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -408,19 +398,19 @@ const Homepage = () => {
                         </p>
                       </Accordion.Header>
                       {week?.courseArray?.map((course) => {
+                        console.log("log",course);
                         return (
                           <div key={course?.id}>
                             <Link to={`/course/${course?.id}`}>
                               <Accordion.Body style={{ color: "red" }}>
+                             { course?.bannerUrl ?
+                             (<img src={course?.bannerUrl} alt="course-Image" />) : (
+                             <h6>No Image available </h6> )
+                             } 
                                 <h4 onClick={() => playVideo(course?.id)}>
                                   {course?.name}
                                 </h4>
                                 <p>{course?.description}</p>
-                                <button
-                                  onClick={() => bookmarkContent(course?.id)}
-                                >
-                                  Bookmark
-                                </button>
                                 <hr />
                               </Accordion.Body>
                             </Link>
