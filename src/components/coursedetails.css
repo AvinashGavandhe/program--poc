@@ -40,3 +40,13 @@
     padding: 7px;
     width: 50%;
 }
+
+.player{
+    margin: 10px;
+    padding: 10px;
+    height: 100px;
+}
+
+.course-container{
+    margin-top: 50%;
+}

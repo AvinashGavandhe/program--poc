@@ -17,7 +17,7 @@ const Homepage = () => {
   const [badgeResponse, setBadgeResponse] = useState();
 
   let location = useLocation();
-  const token = "15971f8775c9c5783b24ae068415c84e";
+  const token = "f4c0993b8e0ce19384083649345347a6";
   const cid = "learningProgram:60466";
 
   useEffect(() => {
@@ -82,8 +82,8 @@ const Homepage = () => {
           // temp.tag = LPDetails?.attributes?.tags[0];
           temp.supplementaryResources =
             LPDetails?.relationships?.supplementaryResources ?? null;
-          console.log("Temp0", temp);
-
+          // console.log("Temp0", temp);
+          // get the course details 
           let courseArray = [];
           const learningPathCourseDetails = response?.data?.included?.find(
             (ele) => ele?.id === temp?.id
@@ -97,14 +97,12 @@ const Homepage = () => {
                 const course = response?.data?.included?.find(
                   (ele) => ele.id === subLos[i]?.id
                 );
-                console.log("test", course);
                 courseAttributes.name =
                   course?.attributes?.localizedMetadata[0].name;
                 courseAttributes.id = course?.id;
                 courseAttributes.description =
                   course?.attributes?.localizedMetadata[0]?.description;
                 courseAttributes.bannerUrl = course?.attributes?.bannerUrl;
-                console.log("courseAttributes",courseAttributes);
                 courseArray.push(courseAttributes);
               }
             }
